@@ -84,7 +84,9 @@ HANGMAN = ["""
     |_____
     """
            ]
-
+SUPPORTED_LANGUAGES = ['polish', 'english']
+# default language is english
+DEFAULT_LANGUAGE = SUPPORTED_LANGUAGES[1]
 
 def main():
     try:
