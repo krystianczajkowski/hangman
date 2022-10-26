@@ -1,10 +1,11 @@
-README
-==========
-Simple terminal based hangman game.
-----------
+# UNIVERSAL HANGMAN
+#### Video Demo: 
+#### Description: 
+
+## About the hangman.
+### What's hangman?
 
 
-(language).txt are files with words acceptable in word games
 
 
 
