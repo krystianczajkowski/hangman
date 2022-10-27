@@ -5,7 +5,7 @@ from random import choice
 from time import sleep
 from blessed import Terminal
 from translate import translate_lang
-
+from random_location import location
 term = Terminal()
 
 HANGMAN = {
@@ -93,6 +93,7 @@ HANGMAN = {
 
 SUPPORTED_LANGUAGES = ['english', 'polish']
 
+
 def main():
 
     if check_internet():
@@ -106,12 +107,11 @@ def main():
                         f"Choose your language: supported languages - {SUPPORTED_LANGUAGES} "
                     )
                 )
-            )
-        )
+            ), 'Definition unavailable due to lack of internet!')
 
 
 def check_internet() -> bool:
-    """Checks for internet conectivity"""
+    """Checks for network conectivity"""
     return socket.gethostbyname(socket.gethostname()) != "127.0.0.1"
 
 
@@ -146,7 +146,7 @@ def find_lttr(word: str, g_word: list, lttr: str) -> list | str:
     return g_word
 
 
-def play_game(word: str, word_with_definition: str) -> None:
+def play_game(word: str, word_with_definition: tuple[str, str]) -> None:
     """Plays the game of hangman"""
     wrong_lttrs = ""
     # turn the word into a list and replace all letters with underscores, spaces stay where they are
@@ -169,7 +169,7 @@ def play_game(word: str, word_with_definition: str) -> None:
 
         if wrong_lttrs:
             print(f'{HANGMAN[tries]}')
-            print(f'{term.move_xy(2, 12)}Entered letters: {" ".join(wrong_lttrs)}')
+            print(f'{term.move_xy(2, 11)}Entered letters: {" ".join(wrong_lttrs)}')
 
         print(f"{term.move_xy(20,15)}{' '.join(g_word).upper()}")
         guess = input(f"{term.move_xy(20, 20)}Enter a letter: ")
@@ -188,25 +188,29 @@ def play_game(word: str, word_with_definition: str) -> None:
 
     if tries == 0:
         print(term.clear)
-        print(f"{term.red2_on_black}{term.move_down(10)}{(HANGMAN[tries])}", " RIP")
+        print(
+            f"{term.red2_on_black}{term.move_down(10)}{(HANGMAN[tries])}", " RIP")
         print(f'{term.center(f"Word was: {word}")}{term.normal}')
         sleep(4)
         print(f"{term.skyblue_on_black}{term.clear}")
         print(f"{term.move_xy(5, 5)}Press SPACE to play again or ESC to quit.")
         print(f'{term.move_xy(5, 7)}If you want to get the definition press "i".')
-        print(f"{term.move_xy(5, 9)}Disclaimer all definitions are in English!")
+        # move this to a separate function
         val = ""
         with term.cbreak():
             # wait for keypress
             while val.lower() != " ":
-                val = term.inkey(timeout=10)
+                val = term.inkey(timeout=1)
                 if not val:
-                    print(f"{term.clear}{term.move_xy(5, 10)}Press 'ESC' to quit, 'i' to get information about the word, 'SPACE' to play again.")
+                    print(term.clear)
+                    location(
+                        "Press 'ESC' to quit, 'i' to get information about the word, 'SPACE' to play again.")
                 elif val.name == "KEY_ESCAPE":
-                    exit(f"{term.move_xy(5, 10)}{term.red2_on_black}BYE!{term.normal}")
+                    exit(
+                        f"{term.clear}{term.move_xy(0,term.height//2)}{term.red_on_white(term.center('BYE!'))}{term.normal}")
                 elif val.lower() == "i":
-                    exit(f'{term.move_right(10)}{word_with_definition}')
-            print(term.normal)
+                    exit(
+                        f'{term.clear}{term.move_xy(10, term.height//2)}{word_with_definition}')
         if val == " ":
             main()
 
