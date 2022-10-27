@@ -200,7 +200,7 @@ def play_game(word: str, word_with_definition: tuple[str, str]) -> None:
         with term.cbreak():
             # wait for keypress
             while val.lower() != " ":
-                val = term.inkey(timeout=1)
+                val = term.inkey(timeout=10)
                 if not val:
                     print(term.clear)
                     location(
