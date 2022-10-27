@@ -1,9 +1,7 @@
 # UNIVERSAL HANGMAN
 #### Video Demo: 
-#### Description: 
-
-## About the hangman.
-### What's hangman?
+### Description: You can play a game of hangman in language of your choice.
+------
 
 
 
