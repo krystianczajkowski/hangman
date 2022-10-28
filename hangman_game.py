@@ -6,6 +6,8 @@ from time import sleep
 from blessed import Terminal
 from translate import translate_lang
 import pyfiglet
+import requests
+from requests.exceptions import ConnectionError
 
 term = Terminal()
 HANGMAN = {
@@ -112,13 +114,15 @@ def main():
                 )
             ), 'Definition unavailable due to lack of internet!')
 
+
 def check_internet() -> bool:
-    """Checks for network conectivity(poorly)"""
+    """Checks for network conectivity"""
     try:
-        pass
-    except:
-        pass
-    return socket.gethostbyname(socket.gethostname()) != "127.0.0.1"
+        requests.get('https://google.com', )
+        requests.get('https://google.pl', )
+        return True
+    except ConnectionError:
+        return False
 
 
 def select_language(lang: str) -> str:
@@ -128,8 +132,8 @@ def select_language(lang: str) -> str:
         return lang.lower()
     else:
         print(
-            f"{term.red2}Language: {term.cornflowerblue}{lang}{term.red2} unsupported! Defaulting to English.{term.normal}"
-        )
+            f"{term.red2}Language: {term.cornflowerblue}{lang}{term.red2} unsupported! Defaulting to English.{term.normal}")
+        sleep(2)
         return "english"
 
 
@@ -200,8 +204,10 @@ def play_game(word: str, word_with_definition: str) -> None:
                 end=" ",
             )
         else:
-            print(f"{term.move_xy(20, term.height//2+2)}Lenght of the word: {len_word}")
-            print(f"{term.move_xy(20, term.height//2+3)}Number of words: {num_of_words}")
+            print(
+                f"{term.move_xy(20, term.height//2+2)}Lenght of the word: {len_word}")
+            print(
+                f"{term.move_xy(20, term.height//2+3)}Number of words: {num_of_words}")
 
         if wrong_lttrs:
             # stage of the fellow on the gallows
@@ -211,7 +217,8 @@ def play_game(word: str, word_with_definition: str) -> None:
 
         print(f"{term.move_xy(20, term.height//2+7)}{' '.join(g_word).upper()}")
         # guess is happening here
-        guess = input(f"{term.move_xy(20, term.height//2+8)}Enter a letter: {term.green}")
+        guess = input(
+            f"{term.move_xy(20, term.height//2+8)}Enter a letter: {term.green}")
         if guess and guess.lower()[0] not in word:
             tries -= 1
             wrong_lttrs += guess.upper()[0]
