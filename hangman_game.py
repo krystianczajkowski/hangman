@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-import socket
 from random import choice
 from time import sleep
 from blessed import Terminal
@@ -119,7 +118,6 @@ def check_internet() -> bool:
     """Checks for network conectivity"""
     try:
         requests.get('https://google.com', )
-        requests.get('https://google.pl', )
         return True
     except ConnectionError:
         return False
@@ -163,6 +161,7 @@ def play_again_or_get_definition(definition):
     print(
         f'{term.move_right(20)}If you want to get the definition press "i".{term.normal}')
     val = ""
+    flag = False
     with term.cbreak():
         # wait for keypress
         while val.lower() != " ":
@@ -174,9 +173,10 @@ def play_again_or_get_definition(definition):
             elif val.name == "KEY_ESCAPE":
                 exit(
                     f"{term.clear}{term.move_xy(0 ,term.height//2)}{term.red_on_white(term.center('BYE!'))}{term.normal}{term.move_xy(0,term.height)}")
-            elif val.lower() == "i":
+            elif val.lower() == "i" and not flag:
                 print(
                     f'{term.move_xy(20, term.height//2)+term.blue}{definition}{term.move_xy(0,term.height)+term.normal}')
+                flag = True
     if val == " ":
         print(term.clear+term.normal)
         main()
@@ -203,11 +203,12 @@ def play_game(word: str, word_with_definition: str) -> None:
                 f"{term.move_xy(20, term.height//2-2)}Lenght of the word: {len_word}\n {term.move_xy(20, term.height//2-3)}Number of spaces: {spaces}",
                 end=" ",
             )
+            print(
+                f"{term.move_xy(20, term.height//2+3)}Number of words: {num_of_words}")
         else:
             print(
                 f"{term.move_xy(20, term.height//2+2)}Lenght of the word: {len_word}")
-            print(
-                f"{term.move_xy(20, term.height//2+3)}Number of words: {num_of_words}")
+            
 
         if wrong_lttrs:
             # stage of the fellow on the gallows
