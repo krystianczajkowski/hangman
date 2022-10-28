@@ -1,12 +1,14 @@
 #!/usr/bin/python3
 
+from blessed import Terminal
+from deep_translator.exceptions import LanguageNotSupportedException
+from deep_translator import GoogleTranslator
+from requests.exceptions import ConnectionError
+import requests
 from random import choice
 from time import sleep
-from blessed import Terminal
-from translate import translate_lang
 import pyfiglet
-import requests
-from requests.exceptions import ConnectionError
+
 
 term = Terminal()
 HANGMAN = {
@@ -94,7 +96,7 @@ HANGMAN = {
 
 # in case of no internet use this
 SUPPORTED_LANGUAGES = ['english', 'polish']
-TITLE = pyfiglet.figlet_format('HANGMAN', font='banner3-D')
+
 
 
 def main():
@@ -135,14 +137,44 @@ def select_language(lang: str) -> str:
         return "english"
 
 
+def translate_lang():
+    """Returns a random word from a file translated to user specified language"""
+    # specify lang
+    language = input('Enter a language: ').lower()
+    # grab a word
+    with open('words_with_definitions.txt', encoding='utf-8') as f:
+        data = choice(f.readlines()).lower().split()
+        word = data[0]
+        definition = ' '.join(data[1:])
+    # don't translate from en to en
+    if language == 'en' or language == 'english':
+        return word, f'{word.upper()} - {definition}'
+    else:
+        try:
+            if language:
+                translated = GoogleTranslator(
+                    source='en', target=language).translate(word)
+            else:
+                print('No language provided, defaulting to english!')
+                sleep(1)
+                return word, f'{word.upper()} - {definition}'
+
+        except LanguageNotSupportedException:
+            print(f'Language {language} not supported, swiched to english!')
+            sleep(1)
+            return word, f'{word.upper()} - {definition}'
+
+        return translated, f'{word.upper()} - {definition}'
+
+
 def get_word(language: str) -> str:
-    """Grabs a random word with definition from a file"""
+    """Grabs a random word from a file"""
     with open(f"{language}.txt", encoding="utf-8") as f:
         return choice(f.readlines()).strip().lower()
 
 
 def find_lttr(word: str, g_word: list, lttr: str) -> list | str:
-    """Searches one string for a letter and if it finds it replaces it in second string(which is a list)."""
+    """Searches word: str for a lttr: str|char and if it finds it, replaces it in g_word: list."""
     if lttr.lower() == word:
         g_word = word
         return g_word
@@ -157,11 +189,11 @@ def find_lttr(word: str, g_word: list, lttr: str) -> list | str:
 def play_again_or_get_definition(definition):
     """Prompts the user to press a key."""
     print(
-        f"{term.skyblue_on_black}{term.move_right(20)}Press SPACE to play again or ESC to quit.")
+        f"{term.skyblue}{term.move_right(20)}Press SPACE to play again or ESC to quit.")
     print(
         f'{term.move_right(20)}If you want to get the definition press "i".{term.normal}')
     val = ""
-    flag = False
+    shown = False
     with term.cbreak():
         # wait for keypress
         while val.lower() != " ":
@@ -173,10 +205,10 @@ def play_again_or_get_definition(definition):
             elif val.name == "KEY_ESCAPE":
                 exit(
                     f"{term.clear}{term.move_xy(0 ,term.height//2)}{term.red_on_white(term.center('BYE!'))}{term.normal}{term.move_xy(0,term.height)}")
-            elif val.lower() == "i" and not flag:
+            elif val.lower() == "i" and not shown:
                 print(
                     f'{term.move_xy(20, term.height//2)+term.blue}{definition}{term.move_xy(0,term.height)+term.normal}')
-                flag = True
+                shown = True
     if val == " ":
         print(term.clear+term.normal)
         main()
@@ -185,6 +217,7 @@ def play_again_or_get_definition(definition):
 def play_game(word: str, word_with_definition: str) -> None:
     """Plays the game of hangman"""
 
+    TITLE = pyfiglet.figlet_format('HANGMAN', font='banner3-D')
     wrong_lttrs, g_word = '', ["_" if letter !=
                                " " else letter for letter in word]
     spaces = 0 + sum([1 for i in word if i == " "])
@@ -208,7 +241,6 @@ def play_game(word: str, word_with_definition: str) -> None:
         else:
             print(
                 f"{term.move_xy(20, term.height//2+2)}Lenght of the word: {len_word}")
-            
 
         if wrong_lttrs:
             # stage of the fellow on the gallows
@@ -217,7 +249,6 @@ def play_game(word: str, word_with_definition: str) -> None:
             print(f'{term.move_xy(0, term.height//2)}{HANGMAN[tries]}')
 
         print(f"{term.move_xy(20, term.height//2+7)}{' '.join(g_word).upper()}")
-        # guess is happening here
         guess = input(
             f"{term.move_xy(20, term.height//2+8)}Enter a letter: {term.green}")
         if guess and guess.lower()[0] not in word:
