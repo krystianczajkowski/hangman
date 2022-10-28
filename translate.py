@@ -16,21 +16,20 @@ def translate_lang():
         definition = ' '.join(data[1:])
     # don't translate from en to en
     if language == 'en' or language == 'english':
-        return word, f'{word} - {definition}'
+        return word, f'{word.upper()} - {definition}'
     else:
         try:
-            # check if user pressed something besides enter
             if language:
                 translated = GoogleTranslator(
                     source='en', target=language).translate(word)
             else:
                 print('No language provided, defaulting to english!')
                 sleep(1)
-                return word, f'{word} - {definition}'
+                return word, f'{word.upper()} - {definition}'
 
         except LanguageNotSupportedException:
-            print('Language not supported, swiched to english!')
+            print(f'Language {language} not supported, swiched to english!')
             sleep(1)
-            return word, f'{word} - {definition}'
+            return word, f'{word.upper()} - {definition}'
 
-        return translated, f'{word} - {definition}'
+        return translated, f'{word.upper()} - {definition}'

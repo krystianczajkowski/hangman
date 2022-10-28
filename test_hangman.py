@@ -1,9 +1,14 @@
-from hangman_game import get_word, find_lttr, select_language, SUPPORTED_LANGUAGES
-
+from hangman_game import get_word, find_lttr, select_language
+import pytest
 
 def test_get_word_supported():
     assert get_word('test_language') == 'test'
 
+
+def test_get_word_unsupported():
+    with pytest.raises(FileNotFoundError) as fnfe:
+        get_word('enmglish') 
+    assert "No such file or directory" in str(fnfe)
 
 def test_select_language_unsuppported():
     assert select_language('piglatin') == 'english'
