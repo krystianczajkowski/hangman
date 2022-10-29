@@ -119,7 +119,7 @@ def main():
 def check_internet() -> bool:
     """Checks for network conectivity"""
     try:
-        requests.get('https://google.com', )
+        requests.get('https://translate.google.com', )
         return True
     except ConnectionError:
         return False
