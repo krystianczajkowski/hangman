@@ -95,17 +95,16 @@ HANGMAN = {
 }
 
 # in case of no internet use this
-SUPPORTED_LANGUAGES = ['english', 'polish']
-
+SUPPORTED_LANGUAGES = ["english", "polish"]
 
 
 def main():
-    print(f'{term.clear+term.home}')
-    print(pyfiglet.figlet_format('HANGMAN', font='cybermedium'))
+    print(f"{term.clear+term.home}")
+    print(pyfiglet.figlet_format("HANGMAN", font="cybermedium"))
     if check_internet():
-        play_game(*translate_lang())
+        play_game(*translate())
     else:
-        print(f'{term.clear}{term.red2}No internet connection!{term.normal}')
+        print(f"{term.clear}{term.red2}No internet connection!{term.normal}")
         play_game(
             get_word(
                 select_language(
@@ -113,13 +112,15 @@ def main():
                         f"Choose your language: supported languages - {SUPPORTED_LANGUAGES} "
                     )
                 )
-            ), 'Definition unavailable due to lack of internet!')
+            ),
+            "Definition unavailable due to lack of internet!",
+        )
 
 
 def check_internet() -> bool:
     """Checks for network conectivity"""
     try:
-        requests.get('https://translate.google.com', )
+        requests.get("https://translate.google.com")
         return True
     except ConnectionError:
         return False
@@ -132,39 +133,41 @@ def select_language(lang: str) -> str:
         return lang.lower()
     else:
         print(
-            f"{term.red2}Language: {term.cornflowerblue}{lang}{term.red2} unsupported! Defaulting to English.{term.normal}")
+            f"{term.red2}Language: {term.cornflowerblue}{lang}{term.red2} unsupported! Defaulting to English.{term.normal}"
+        )
         sleep(2)
         return "english"
 
 
-def translate_lang():
+def translate() -> tuple[str, str]:
     """Returns a random word from a file translated to user specified language"""
     # specify lang
-    language = input('Enter a language: ').lower()
+    language = input("Enter a language: ").lower()
     # grab a word
-    with open('words_with_definitions.txt', encoding='utf-8') as f:
+    with open("words_with_definitions.txt", encoding="utf-8") as f:
         data = choice(f.readlines()).lower().split()
         word = data[0]
-        definition = ' '.join(data[1:])
+        definition = " ".join(data[1:])
     # don't translate from en to en
-    if language == 'en' or language == 'english':
-        return word, f'{word.upper()} - {definition}'
+    if language == "en" or language == "english":
+        return word, f"{word.upper()} - {definition}"
     else:
         try:
             if language:
-                translated = GoogleTranslator(
-                    source='en', target=language).translate(word)
+                translated = GoogleTranslator(source="en", target=language).translate(
+                    word
+                )
             else:
-                print('No language provided, defaulting to english!')
+                print("No language provided, defaulting to english!")
                 sleep(1)
-                return word, f'{word.upper()} - {definition}'
+                return word, f"{word.upper()} - {definition}"
 
         except LanguageNotSupportedException:
-            print(f'Language {language} not supported, swiched to english!')
+            print(f"Language {language} not supported, swiched to english!")
             sleep(1)
-            return word, f'{word.upper()} - {definition}'
+            return word, f"{word.upper()} - {definition}"
 
-        return translated, f'{word.upper()} - {definition}'
+        return translated, f"{word.upper()} - {definition}"
 
 
 def get_word(language: str) -> str:
@@ -186,12 +189,14 @@ def find_lttr(word: str, g_word: list, lttr: str) -> list | str:
     return g_word
 
 
-def play_again_or_get_definition(definition):
+def play_again_or_get_definition(definition: str):
     """Prompts the user to press a key."""
     print(
-        f"{term.skyblue}{term.move_right(20)}Press SPACE to play again or ESC to quit.")
+        f"{term.skyblue}{term.move_right(20)}Press SPACE to play again or ESC to quit."
+    )
     print(
-        f'{term.move_right(20)}If you want to get the definition press "i".{term.normal}')
+        f'{term.move_right(20)}If you want to get the definition press "i".{term.normal}'
+    )
     val = ""
     shown = False
     with term.cbreak():
@@ -201,74 +206,84 @@ def play_again_or_get_definition(definition):
             if not val:
                 with term.location(0, 8):
                     print(
-                        f"{term.red}Press 'ESC' to quit, 'i' to get the definition(EN) or 'SPACE' to play again.{term.normal}")
+                        f"{term.red}Press 'ESC' to quit, 'i' to get the definition(EN) or 'SPACE' to play again.{term.normal}"
+                    )
             elif val.name == "KEY_ESCAPE":
                 exit(
-                    f"{term.clear}{term.move_xy(0 ,term.height//2)}{term.red_on_white(term.center('BYE!'))}{term.normal}{term.move_xy(0,term.height)}")
+                    f"{term.clear}{term.move_xy(0 ,term.height//2)}{term.red_on_white(term.center('BYE!'))}{term.normal}{term.move_xy(0,term.height)}"
+                )
             elif val.lower() == "i" and not shown:
                 print(
-                    f'{term.move_xy(20, term.height//2)+term.blue}{definition}{term.move_xy(0,term.height)+term.normal}')
+                    f"{term.move_xy(20, term.height//2)+term.lightblue}{definition}{term.move_xy(0,term.height)+term.normal}"
+                )
                 shown = True
     if val == " ":
-        print(term.clear+term.normal)
+        print(term.clear + term.normal)
         main()
 
 
 def play_game(word: str, word_with_definition: str) -> None:
     """Plays the game of hangman"""
 
-    TITLE = pyfiglet.figlet_format('HANGMAN', font='banner3-D')
-    wrong_lttrs, g_word = '', ["_" if letter !=
-                               " " else letter for letter in word]
+    TITLE = pyfiglet.figlet_format("HANGMAN", font="banner3-D")
+    wrong_lttrs, g_word = "", ["_" if letter != " " else letter for letter in word]
     spaces = 0 + sum([1 for i in word if i == " "])
     len_word = len(word) - spaces
     num_of_words = len(word.split())
     tries = len(HANGMAN)
     print(term.clear)
-    while tries > -1:
+    shown = False
+    while True:
         while term.height < 22 or term.width < 80:
-            print(
-                f'{term.clear+term.home+term.cyan+term.move_xy(0, term.height//2)}Increase your terminal size!{term.red2}')
-            sleep(0.05)
-        print(f'{term.normal+term.clear}{TITLE}')
+            if not shown:
+                print(
+                    f"{term.clear+term.home+term.cyan+term.move_xy(term.width//2-10, term.height//2)}Increase your terminal size!{term.red2}",
+                    "NOW!",
+                )
+            sleep(0.15)
+            shown = term.width > 22 and term.width > 80
+        shown = False
+        print(f"{term.normal+term.clear+term.home}{TITLE}")
         if spaces:
             print(
                 f"{term.move_xy(20, term.height//2-2)}Lenght of the word: {len_word}\n {term.move_xy(20, term.height//2-3)}Number of spaces: {spaces}",
                 end=" ",
             )
             print(
-                f"{term.move_xy(20, term.height//2+3)}Number of words: {num_of_words}")
+                f"{term.move_xy(20, term.height//2+3)}Number of words: {num_of_words}"
+            )
         else:
-            print(
-                f"{term.move_xy(20, term.height//2+2)}Lenght of the word: {len_word}")
+            print(f"{term.move_xy(20, term.height//2+2)}Lenght of the word: {len_word}")
 
         if wrong_lttrs:
             # stage of the fellow on the gallows
             print(
-                f'{term.move_xy(20, term.height//2)}Entered letters: {" ".join(wrong_lttrs)}')
-            print(f'{term.move_xy(0, term.height//2)}{HANGMAN[tries]}')
+                f'{term.move_xy(20, term.height//2)}Entered letters: {" ".join(wrong_lttrs)}'
+            )
+            print(f"{term.move_xy(0, term.height//2)}{HANGMAN[tries]}")
 
         print(f"{term.move_xy(20, term.height//2+7)}{' '.join(g_word).upper()}")
         guess = input(
-            f"{term.move_xy(20, term.height//2+8)}Enter a letter: {term.green}")
+            f"{term.move_xy(20, term.height//2+8)}Enter a letter: {term.green}"
+        )
         if guess and guess.lower()[0] not in word:
             tries -= 1
             wrong_lttrs += guess.upper()[0]
         else:
             g_word = find_lttr(word, g_word, guess)
             if "".join(g_word) == word:
+                print(f"{term.move_xy(20, term.height//2+6)}{' '.join(g_word).upper()}")
                 print(
-                    f"{term.move_xy(20, term.height//2+6)}{' '.join(g_word).upper()}")
-                print(
-                    f"{term.green+term.move_right(20)}CONGRATULATIONS The word was {word.upper()}{term.normal}"
+                    f"{term.green+term.move_right(20)}Congratulations The word was {word.upper()}{term.normal}"
                 )
                 play_again_or_get_definition(word_with_definition)
 
         if tries == 0:
-            print(term.clear+term.normal)
-            print(TITLE)
+            print(f'{term.clear}{term.normal}{term.red2_on_black}{TITLE}')
             print(
-                f"{term.red2_on_black}{term.move_xy(0, term.height//2)}{(HANGMAN[tries])}", " RIP")
+                f"{term.red2_on_black}{term.move_xy(0, term.height//2)}{(HANGMAN[tries])}",
+                " RIP",
+            )
             print(f"{term.move_xy(20, term.height//2+4)}Word: {word}")
             sleep(3)
             play_again_or_get_definition(word_with_definition)

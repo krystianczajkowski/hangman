@@ -1,4 +1,4 @@
-from hangman_game import get_word, find_lttr, select_language
+from project import get_word, find_lttr, select_language
 import pytest
 
 def test_get_word_supported():
