@@ -6,9 +6,9 @@ def test_get_word_supported():
 
 
 def test_get_word_unsupported():
-    with pytest.raises(FileNotFoundError) as fnfe:
+    with pytest.raises(FileNotFoundError) as FNFE:
         get_word('enmglish') 
-    assert "No such file or directory" in str(fnfe)
+    assert "No such file or directory" in str(FNFE)
 
 def test_select_language_unsuppported():
     assert select_language('piglatin') == 'english'
