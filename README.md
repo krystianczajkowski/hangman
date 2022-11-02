@@ -1,5 +1,5 @@
 # UNIVERSAL HANGMAN
-## *This is my final project for CS50P.*
+## *This is my final project for CS50P.* - Also this is my first README
 -----
 ## Video Demo: [Done](https://youtu.be/opK-rbcFhpU)
 -----
@@ -9,7 +9,8 @@
 It's normal hangman but you can choose any language you want (*that is aslo coincidentally supported by Google Translate - more on that later*) and maybe a few other features that end user won't notice.
 
 ## How does it work?
-It doesn't divagate too much from standard whiteboard/blackboard hangman everyone had a chance to play or at least spectate at some point in their lives. <br>
+It's made in Python using [blessed](https://pypi.org/project/blessed/) and [deep_translator](https://pypi.org/project/deep-translator/#description)
+It doesn't divagate too much from standard hangman everyone had a chance to play or at least spectate at some point in their lives. <br>
 You will find [detailed description](#every-function-except-tests-in-the-project-is-located-here) bellow
 
 ## Structure:
