@@ -329,7 +329,6 @@ You will find [detailed description](#every-function-except-tests-in-the-project
                 )
                 shown = True
     ```
-    ##### Why not use this in the play_game function? *~The anticipation...*
     ### When user decides to press SPACE
     ```python
     # clear the screen and call main so that we have come full circle back to the beginning

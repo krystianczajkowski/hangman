@@ -120,8 +120,7 @@ def main():
 def check_internet() -> bool:
     """Checks for network conectivity"""
     try:
-        requests.get("https://translate.google.com")
-        return True
+        return requests.get("https://translate.google.com")
     except ConnectionError:
         return False
 
@@ -210,15 +209,15 @@ def play_again_or_get_definition(definition: str):
                     )
             elif val.name == "KEY_ESCAPE":
                 exit(
-                    f"{term.clear}{term.move_xy(0 ,term.height//2)}{term.red_on_white(term.center('BYE!'))}{term.normal}{term.move_xy(0,term.height)}"
+                    f"{term.clear}{term.move_xy(0 ,term.height//2+1)}{term.red_on_white(term.center('BYE!'))}{term.normal}{term.move_xy(0,term.height)}"
                 )
             elif val.lower() == "i" and not shown:
-                print(
-                    f"{term.move_xy(20, term.height//2)+term.lightblue}{definition}{term.move_xy(0,term.height)+term.normal}"
-                )
+                with term.location(20, term.height//2):
+                    print(
+                        f"{term.lightblue}{definition}{term.normal}"
+                    )
                 shown = True
     if val == " ":
-        print(term.clear + term.normal)
         main()
 
 
@@ -231,62 +230,70 @@ def play_game(word: str, word_with_definition: str) -> None:
     len_word = len(word) - spaces
     num_of_words = len(word.split())
     tries = len(HANGMAN)
-    print(term.clear)
     shown = False
-    while True:
-        while term.height < 22 or term.width < 80:
-            if not shown:
+    with term.cbreak(), term.hidden_cursor():
+        while True:
+            guess = ''
+            while term.height < 22 or term.width < 80:
+                if not shown:
+                    print(
+                        f"{term.clear+term.home+term.cyan+term.move_xy(term.width//2-10, term.height//2)}Increase your terminal size!{term.red2}",
+                        "NOW!",
+                    )
+                sleep(0.15)
+                shown = term.width > 22 and term.width > 80
+            shown = False
+            print(f"{term.normal+term.clear+term.home}{TITLE}")
+
+            if spaces:
                 print(
-                    f"{term.clear+term.home+term.cyan+term.move_xy(term.width//2-10, term.height//2)}Increase your terminal size!{term.red2}",
-                    "NOW!",
+                    f"{term.move_xy(20, term.height//2-2)}Lenght of the word: {len_word}\n {term.move_xy(20, term.height//2-3)}Number of spaces: {spaces}",
+                    end=" ",
                 )
-            sleep(0.15)
-            shown = term.width > 22 and term.width > 80
-        shown = False
-        print(f"{term.normal+term.clear+term.home}{TITLE}")
-        if spaces:
-            print(
-                f"{term.move_xy(20, term.height//2-2)}Lenght of the word: {len_word}\n {term.move_xy(20, term.height//2-3)}Number of spaces: {spaces}",
-                end=" ",
-            )
-            print(
-                f"{term.move_xy(20, term.height//2+3)}Number of words: {num_of_words}"
-            )
-        else:
-            print(f"{term.move_xy(20, term.height//2+2)}Lenght of the word: {len_word}")
-
-        if wrong_lttrs:
-            # stage of the fellow on the gallows
-            print(
-                f'{term.move_xy(20, term.height//2)}Entered letters: {" ".join(wrong_lttrs)}'
-            )
-            print(f"{term.move_xy(0, term.height//2)}{HANGMAN[tries]}")
-
-        print(f"{term.move_xy(20, term.height//2+7)}{' '.join(g_word).upper()}")
-        guess = input(
-            f"{term.move_xy(20, term.height//2+8)}Enter a letter: {term.green}"
-        )
-        if guess and guess.lower()[0] not in word:
-            tries -= 1
-            wrong_lttrs += guess.upper()[0]
-        else:
-            g_word = find_lttr(word, g_word, guess)
-            if "".join(g_word) == word:
-                print(f"{term.move_xy(20, term.height//2+6)}{' '.join(g_word).upper()}")
                 print(
-                    f"{term.green+term.move_right(20)}Congratulations The word was {word.upper()}{term.normal}"
+                    f"{term.move_xy(20, term.height//2+3)}Number of words: {num_of_words}"
                 )
-                play_again_or_get_definition(word_with_definition)
+            else:
+                print(
+                    f"{term.move_xy(20, term.height//2+2)}Lenght of the word: {len_word}")
 
-        if tries == 0:
-            print(f'{term.clear}{term.normal}{term.red2_on_black}{TITLE}')
-            print(
-                f"{term.red2_on_black}{term.move_xy(0, term.height//2)}{(HANGMAN[tries])}",
-                " RIP",
-            )
-            print(f"{term.move_xy(20, term.height//2+4)}Word: {word}")
-            sleep(3)
-            play_again_or_get_definition(word_with_definition)
+            if wrong_lttrs:
+                # stage of the fellow on the gallows
+                print(
+                    f'{term.move_xy(20, term.height//2)}Entered letters: {" ".join(wrong_lttrs)}'
+                )
+                print(f"{term.move_xy(0, term.height//2)}{HANGMAN[tries]}")
+
+            print(f"{term.move_xy(20, term.height//2+7)}{' '.join(g_word).upper()}")
+
+            guess = term.inkey(timeout=30)
+            if guess.name == "KEY_ESCAPE":
+                exit(
+                    f"{term.clear}{term.move_xy(0 ,term.height//2)}{term.red_on_white(term.center('BYE!'))}{term.normal}{term.move_xy(0,term.height)}"
+                )
+            elif str(guess).lower() not in word and str(guess).isalpha():
+                tries -= 1
+                wrong_lttrs += str(guess).upper()
+            else:
+                g_word = find_lttr(word, g_word, str(guess))
+                if "".join(g_word) == word:
+                    print(
+                        f"{term.move_xy(20, term.height//2+6)}{' '.join(g_word).upper()}")
+                    print(
+                        f"{term.green+term.move_right(20)}Congratulations The word was {word.upper()}{term.normal}"
+                    )
+                    break
+            if tries == 0:
+                print(f'{term.clear}{term.normal}{term.red2_on_black}{TITLE}')
+                print(
+                    f"{term.red2_on_black}{term.move_xy(0, term.height//2)}{(HANGMAN[tries])}",
+                    " RIP",
+                )
+                print(f"{term.move_xy(20, term.height//2+4)}Word: {word}")
+                sleep(3)
+                break
+            
+    play_again_or_get_definition(word_with_definition)
 
 
 if __name__ == "__main__":
